@@ -1,140 +1,128 @@
-import pygame
-import random
+import pygame, random
 
-RES = (400, 600)
+image_rock = pygame.image.load('PythonPygame-main\sprites\stone.png')
+sizes = [[64, 64], [96, 96], [128, 128], [160, 160], [198, 198]]
+rocks = []
+for size in sizes:
+    rocks.append(pygame.transform.scale(image_rock, size))
+RES = (800, 600)
 
-screen = pygame.display.set_mode(RES)
+ekran = pygame.display.set_mode(RES)
 clock = pygame.time.Clock()
 FPS = 60
 
 running = True
 WHITE = (255, 255, 255)
 RED = (255, 0, 0)
-transparent = (0, 0, 0, 0)
+BLACK = (0, 0, 0)
 
-background = pygame.image.load('doroga.png')
-background = pygame.transform.scale(background, (400, 600))
-        
-
-
-class Car(pygame.sprite.Sprite,):
-    def __init__(self, position):
-        super().__init__()
-        self.image = pygame.image.load("ars/Player.jpg")
+class Player(pygame.sprite.Sprite,):
+    def __init__(self):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = pygame.image.load('PythonPygame-main\sprites\spaceship.png')
         self.rect = self.image.get_rect()
-        self.rect.center = position
-        self.y = 0
-        self.speed = 12
-        self.score = 0
-
-    def move(self):
-        keys = pygame.key.get_pressed()
-        if keys[pygame.K_a]:
-            self.rect.x -= self.speed
-        elif keys[pygame.K_d]:
-            self.rect.x += self.speed
-        elif keys[pygame.K_s]:
-            self.rect.y += self.speed
-        elif keys[pygame.K_w]:
-            self.rect.y -= self.speed
-        
-            
-            
-
-
-    def draw(self):
-        screen.blit(self.image, self.rect)
-
-
-
-
-
-class enemy_car(pygame.sprite.Sprite):
-    def __init__(self,):
-        super().__init__()
-        self.image = pygame.image.load("ars/Enemy.jpg")
-        self.rect = self.image.get_rect()
-        self.rect.center = (random.randint(50, 300), 0)
-        self.death = pygame.image.load("ars/you_died.png")
-        self.death = pygame.transform.scale(self.death, (200, 100))
-        self.speed = 10
+        self.rect.center = (400, 400)
+        self.speed = 15
         
 
     def update(self):
-        self.rect.y += self.speed
-        if  self.rect.y > 700:
-            self.rect.y = -100
-            self.rect.center = (random.randint(50, 300), -100)
-
-    def kill(self, Car):
-        if Car.rect.colliderect(self.rect):
-            screen.blit(self.death, (100, 100))
+        keys = pygame.key.get_pressed()
+        
+        if keys[pygame.K_w]:
             self.rect.y -= self.speed
-        
-        
-        
+           
+        elif keys[pygame.K_s]:
+            self.rect.y += self.speed
+          
+        elif keys[pygame.K_a]:
+            self.rect.x -= self.speed
+          
+        elif keys[pygame.K_d]:
+            self.rect.x += self.speed
+           
 
-    def draw(self):
-        screen.blit(self.image, self.rect)
-        if self.rect.x < 0:
-            self.kill
-
-
-class coin(pygame.sprite.Sprite):
+class Rock(pygame.sprite.Sprite):
     def __init__(self):
-        super().__init__()
-        self.image = pygame.image.load("ars/Coin.png")
-        self.image = pygame.transform.scale(self.image, (50, 50))
+        pygame.sprite.Sprite.__init__(self)
+        self.index = random.randint(0, 4)
+        self.image = rocks[self.index]
+        self.radius = sizes[self.index][0] // 2
         self.rect = self.image.get_rect()
-        self.rect.center = (random.randint(50, 300), random.randint(50, 300))
-        self.speed = 10
+        self.rect.x = random.randrange(800 - self.rect.width)
+        self.rect.y = random.randrange(-150, -100)
+        self.rot_speed = random.randrange(-4, 4)
+        self.rot_angle = 0
+        self.dx = random.uniform(-7, 7)
+        self.dy = random.uniform(1, 7)
+        self.last_update = pygame.time.get_ticks()
 
-    def draw(self):
-        screen.blit(self.image, self.rect)
-        
 
-    def update(self, Car):
-        self.rect.y += self.speed
-        if  self.rect.y > 700:
-            self.rect.y = -100
-            self.rect.center = (random.randint(50, 300), -100)
-        if Car.rect.colliderect(self.rect):
+    def rotate(self):
+        now = pygame.time.get_ticks()
+        if now - self.last_update > 50:
+            self.last_update = now
+            new_image = pygame.transform.rotate(rocks[self.index], self.rot_angle)
+            self.rot_angle = (self.rot_angle + self.rot_speed) % 360
+            old_center = self.rect.center
+            self.image = new_image
+            self.rect = self.image.get_rect()
+            self.rect.center = old_center
+
+    def update(self):
+        coords = self.rect.center
+        #enemy bounces off the borders
+        if(coords[0] + self.dx <- 128):
             self.kill()
-            
+        elif(coords[0] + self.dx > 928):
+            self.kill()
+        else:
+            coords = coords[0] + self.dx, coords[1]
+        if(coords[1] + self.dy <- 128):
+            self.kill()
+        elif(coords[1] + self.dy > 728):
+            self.kill()
+        else:
+            coords = coords[0], coords[1] + self.dy
+        self.rect.center = coords
+        self.rotate()
 
-      
 
-
-
-
+        
+r = Rock()
+p = Player()
 all_sprites = pygame.sprite.Group()
-d = Car((100, 500))
-c = enemy_car()
-cn = coin()
-all_sprites.add(d)
-all_sprites.add(c)
-all_sprites.add(cn)
+mobs = pygame.sprite.Group()
+player = pygame.sprite.Group()
+player.add(p)
+all_sprites.add(p, r)
 
-pygame.init() 
+def spawn():
+    for i in range(10 - len(mobs)):
+        t = Rock()
+        all_sprites.add(t)
+        mobs.add(t)
+spawn()
 
 
+
+
+
+
+pygame.init()
 while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
-    
 
-    screen.fill(WHITE)
-    screen.blit(background, (0, 0))
 
-    
-    all_sprites.draw(screen)
-    
-    
-    d.move()
-    c.update()
-    c.kill(d)
-    cn.update(d)
+    spawn()
+    hit_player = pygame.sprite.spritecollide(p, mobs, False, pygame.sprite.collide_circle)
+    if hit_player:
+        running = False
+
+    ekran.fill(RED)
+    all_sprites.draw(ekran)
+    all_sprites.update()
     pygame.display.flip()
     clock.tick(FPS)
 
