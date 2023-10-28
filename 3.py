@@ -10,7 +10,7 @@ image_explode = (pygame.image.load("PythonPygame-main/sprites/explosions/regular
                   pygame.image.load("PythonPygame-main/sprites/explosions/regularExplosion06.png"), 
                   pygame.image.load("PythonPygame-main/sprites/explosions/regularExplosion07.png"), 
                   pygame.image.load("PythonPygame-main/sprites/explosions/regularExplosion08.png"))
-laser_upgrade = pygame.image.load("PythonPygame-main/sprites/Mega_laser.png")
+laser_upgrade = pygame.image.load("PythonPygame-main/sprites/laser_beam.png")
 pup = pygame.image.load('PythonPygame-main/sprites/chilli-removebg-preview.png')
 image_lazer = pygame.image.load('PythonPygame-main/sprites/laser.png')
 image_rock = pygame.image.load('PythonPygame-main\sprites\stone.png')
@@ -36,7 +36,7 @@ class Player(pygame.sprite.Sprite,):
         pygame.sprite.Sprite.__init__(self)
         self.image = pygame.image.load('PythonPygame-main\sprites\spaceship.png')
         self.rect = self.image.get_rect()
-        self.rect.center = (400, 400)
+        self.rect.center = (380, 400)
         self.speed = 20
         self.shoot_delay = 100
         self.last_shoot = pygame.time.get_ticks()
@@ -140,18 +140,17 @@ class power_up(pygame.sprite.Sprite):
         super().__init__()
         self.image = pup
         self.rect = self.image.get_rect()
-        self.image = pygame.transform.scale(self.image, (50, 50))
-        self.rect.center = (random.randint(50, 700), random.randint(50, 700))
-        self.speed = random.randrange(10, 20)
+        self.image = pygame.transform.scale(self.image, (100, 100))
+        self.rect.center = (random.randint(50, 700), random.randint(50, 200))
+        self.speed = 10
 
 
     def update(self):
         self.rect.y += self.speed
         if self.rect.y >= 600:
             self.kill()
-        if pygame.sprite.spritecollide(p, PowerUp, True):
+        if pygame.sprite.spritecollide(p, PowerUp, True,):
             self.kill()
-
 
 class Explosion(pygame.sprite.Sprite):
     def __init__(self, coords):
@@ -173,18 +172,15 @@ class Explosion(pygame.sprite.Sprite):
                 self.last_stage = now
                 self.image = image_explode[self.stage]
 
-up = power_up()   
-r = Rock()
+   
 p = Player()
-PowerUp = pygame.sprite.Group()
-PowerUp.add(up)
 all_sprites = pygame.sprite.Group()
 mobs = pygame.sprite.Group()
 player = pygame.sprite.Group()
-bullets = pygame.sprite.Group()
-all_sprites.add(p, r)
-chillis = pygame.sprite.Group()
 player.add(p)
+bullets = pygame.sprite.Group()
+all_sprites.add(p)
+PowerUp = pygame.sprite.Group()
 
 
 def spawn():
@@ -195,11 +191,12 @@ def spawn():
 spawn()
 
 def fill_chilli():
-    for i in range(2 - len(chillis)):
-        c = power_up()
-        all_sprites.add(c)
-        chillis.add(c)
-        
+    for i in range(1 - len(PowerUp)):
+        w = power_up()
+        all_sprites.add(w)
+        PowerUp.add(w)
+        if pygame.sprite.groupcollide(player, PowerUp, True, True):
+            break
 
 pygame.init()
 font = pygame.font.SysFont('ARIAL', 25)
