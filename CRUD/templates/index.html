@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+    <head></head>
+    <body>
+        <form method="POST" action="create/">
+            <p>
+                <label>Введите имя</label><br>
+                <input type="text" name="name" />
+            </p>
+            <p>
+                <label>Введите возраст</label><br>
+                <input type="number" name="age" />
+            </p>
+            <input type="submit" value="Сохранить" >
+        </form>
+        <h2>Список пользователей</h2>
+        <table>
+            <thead><th>Id</th><th>Имя</th><th>Возраст</th><th></th></thead>
+            {% for person in people %}
+            <tr>
+                <td>{{ person.id }}</td>
+                <td>{{ person.name }}</td>
+                <td>{{ person.age }}</td>
+                <td><a href="edit/{{person.id}}">Изменить</a> | <a href="delete/{{person.id}}">Удалить</a></td>
+            </tr>
+            {% endfor %}
+        </table>
+    </body>
+</html>
